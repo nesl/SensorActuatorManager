@@ -1,0 +1,467 @@
+{
+	"services": [
+		{
+		    "enable": true,
+			"type": "Xively",
+			"id": "Xively/Mani",
+			"params": {
+				"api_key": "%%APIKEY_XI",
+				"upload_interval":{
+					"131445":12, "69814":12, "131439":12, ".*":10
+				},
+				"upload_interval_burst":{
+					"131445":6, "69814":6, "131439":6, ".*":6
+				},
+				"upload_buffer_size":500,
+				"max_datapoints_per_write":490, 
+				"dropped_datapoint_save": true,
+				"dropped_datapoint_folder":"./sam_drops"
+			}
+		},
+		{
+			"enable": false,
+			"type": "SensorAct",
+			"id": "SensorAct/NESL",
+			"params": {
+				"host": "128.97.93.51",
+				"port": "9000",
+				"api_key": "%%APIKEY_SA"
+			}
+		},
+		{
+			"enable": true,
+			"type": "Stdout",
+			"id": "Stdout"
+		},
+		{
+			"enable": true,
+			"type": "File",
+			"id": "File1",
+			"params": {
+				"file": "./sam_out/home3747",
+				"prefix": "home3747"
+			}
+		},
+		{
+			"enable": true,
+			"type": "File",
+			"id": "File2",
+			"params": {
+				"folder": "./sam_out",
+				"prefix": "test"
+			}
+		}
+	],
+	
+	
+	"devices": [
+		{
+			"enable": "False",
+			"type": "EatonIQ260",
+			"id": "BHMeter1",
+			"params": {
+				"host": "128.97.11.100",
+				"port": 4660,
+				"sample_interval": 3,
+				"sensor_names_map":{}
+			},
+			"services": [
+				{
+					"enable": "True",
+					"id": "Stdout"
+				}
+			]
+		},
+		{
+			"enable": "False",
+			"type": "VerisE30A042",
+			"id": "NESLPanel",
+			"params": {
+				"host": "128.97.93.90",
+				"port": 4660,
+				"sample_interval": 3,
+				"sensor_names_map":{},
+				"sensors":["%%[str(x+1) for x in range(20)]"]
+			},
+			"services": [
+				{
+					"enable": "True",
+					"id": "Stdout",
+					"params": {
+					}
+				}
+			]
+		},
+		{
+			"enable": "False",
+			"type": "PushDevice",
+			"id": "PushDeviceServer",
+			"params": {
+				"port": 8100,
+				"apikey": "abcd",
+				"mode": "cherrypy",
+				"sensors": [
+					{"feed":"12", "datastream":"front_door", "unit":"bool", "feed_name":"1012", "datastream_name":"front_door_event"},
+					{"feed":"13", "datastream":"garage_door", "unit":"bool", "feed_name":"1013", "datastream_name":"garage_door_event"}
+				]
+			},
+			"services": [
+				{
+					"enable": "False",
+					"id": "Xively/Mani",
+					"params": {
+						"feed_map": {
+							".*": "\\0"
+						},
+						"feed": "10",
+						"datastream_map": {
+							".*": "\\0"
+						},
+						"aggregation": "10",
+						"downsampling": "2"
+					}
+				},
+				{
+					"enable": "True",
+					"id": "Stdout",
+					"params": {
+						"channel_mask": "%%[1 for x in range(2)]",
+						"channel_transform": "%%[[1,0] for x in range(2)]"
+					}
+				}
+			]
+		},
+		{
+			"enable": "False",
+			"type": "Vera",
+			"id": "Vera3@Home",
+			"params": {
+				"host": "vera3.mhome",
+				"sample_interval": 2,
+				"sensors": [
+					{"type":"devices", "id":19, "field":"tripped", "unit":"bool", "name":"front_door_status"},
+					{"type":"devices", "id":19, "field":"batterylevel", "unit":"%", "name":"front_door_battery_level"},
+					{"type":"devices", "id":79, "field":"tripped", "unit":"bool", "name":"garage_door_status"}
+				],
+				"actuators": []
+			},
+			"services": [
+				{
+					"enable": "True",
+					"id": "Stdout",
+					"params": {
+					}
+				}
+			]
+		},
+		{
+		    "enable": "True",
+			"type": "Shenitech",
+			"id": "MainMeter",
+			"params": {
+				"host": "10.0.0.180:10001",
+				"sample_interval": "1",
+				"sensor_names_map":{"Flow":"FlowRate"}
+			},
+			"services": [
+				{
+					"enable": "True",
+					"id": "Xively/Mani",
+					"params": {
+						"feed": "69814",
+						"datastream_map": {
+							"FlowRate":"house_water_flow",
+							"XXX.*": "\\g<0>"
+						},
+						"aggregation": "10",
+						"downsampling": "2"
+					}
+				},
+				{
+					"enable": "True",
+					"id": "File1",
+					"params": {
+						"write_interval": "10"
+					}
+				},
+				{
+					"enable": "False",
+					"id": "Stdout",
+					"params": {
+					}
+				}
+			]
+		},
+		{
+			"enable": "True",
+			"type": "Raritan",
+			"id": "Raritan_Study",
+			"params": {
+				"host": "10.0.0.235:161",
+				"sample_interval": "3",
+				"username":"admin",
+				"password":"home3747r",
+				"sensor_names_map":{},
+				"sensors":["1","2","3","4","5","6","7","8"]
+			},
+			"services": [
+				{
+					"enable": "True",
+					"id": "Xively/Mani",
+					"params": {
+						"feed": "131445",
+						"datastream_map": {
+							"PowerFactor\\[(.*)\\]":"PowerFactor_Study_\\g<1>", 
+							"RealPower\\[(.*)\\]":"RealPower_Study_\\g<1>",
+							"ApparentPower\\[(.*)\\]":"ApparentPower_Study_\\g<1>",
+							"Current\\[(.*)\\]":"Current_Study_\\g<1>",
+							"Voltage\\[(.*)\\]":"Voltage_Study_\\g<1>",
+							"XXX.*": "\\g<0>"
+						},
+						"aggregation": "10",
+						"downsampling": "2"
+					}
+				},
+				{
+					"enable": "True",
+					"id": "File1",
+					"params": {
+						"write_interval": "10"
+					}
+				},
+				{
+					"enable": "False",
+					"id": "Stdout",
+					"params": {
+						"channel_mask": "%%[1 for x in range(40)]",
+						"channel_transform": "%%[[1,0] for x in range(40)]" 
+					}
+				}
+			]
+		},
+		{
+			"enable": "True",
+			"type": "Raritan",
+			"id": "Raritan_TV",
+			"params": {
+				"host": "10.0.0.234:161",
+				"sample_interval": "3",
+				"username":"admin",
+				"password":"home3747r",
+				"sensor_names_map":{},
+				"sensors":["1","2","3","4","5","6","7","8"]
+			},
+			"services": [
+				{
+					"enable": "True",
+					"id": "Xively/Mani",
+					"params": {
+						"feed": "131445",
+						"datastream_map": {
+							"PowerFactor\\[(.*)\\]":"PowerFactor_TV_\\g<1>", 
+							"RealPower\\[(.*)\\]":"RealPower_TV_\\g<1>",
+							"ApparentPower\\[(.*)\\]":"ApparentPower_TV_\\g<1>",
+							"Current\\[(.*)\\]":"Current_TV_\\g<1>",
+							"Voltage\\[(.*)\\]":"Voltage_TV_\\g<1>",
+							"XXX.*": "\\g<0>"
+						},
+						"aggregation": "10",
+						"downsampling": "2"
+					}
+				},
+				{
+					"enable": "True",
+					"id": "File1",
+					"params": {
+						"write_interval": "10"
+					}
+				},
+				{
+					"enable": "False",
+					"id": "Stdout"
+				}
+			]
+		},
+		{
+			"enable": "True",
+			"type": "eGaugeHTTP",
+			"id": "eGauge_MainPanel_1",
+			"params": {
+				"host": "egauge1.mhome:80",
+				"sample_interval": "1",
+				"sensors": [
+					{"id":"V1", "unit":"V"},
+					{"id":"V2", "unit":"V"},
+					{"id":"F1", "unit":"Hz"},
+					{"id":"F2", "unit":"Hz"},
+					{"id":"P1", "unit":"W"},
+					{"id":"P2", "unit":"W"},
+					{"id":"P3", "unit":"W"},
+					{"id":"P4", "unit":"W"},
+					{"id":"P5", "unit":"W"},
+					{"id":"P6", "unit":"W"},
+					{"id":"P7", "unit":"W"},
+					{"id":"P8", "unit":"W"},
+					{"id":"P9", "unit":"W", "name":"P9_real"},
+					{"id":"P9*", "unit":"VA", "name":"P9_apparent"},
+					{"id":"Ptot", "unit":"W", "name":"Ptot_real"},
+					{"id":"Ptot*", "unit":"VA", "name":"Ptot_apparent"}
+				]
+			},
+			"services": [
+				{
+					"enable": "True",
+					"id": "Xively/Mani",
+					"params": {
+						"feed": "131439",
+						"datastream_map": {
+							".*": "eGauge1_\\g<0>"
+						},
+						"aggregation": "10",
+						"downsampling": "2"
+					}
+				},
+				{
+					"enable": "True",
+					"id": "File1",
+					"params": {
+						"write_interval": "10"
+					}
+				},
+				{
+					"enable": "False",
+					"id": "Stdout"
+				}
+			]
+		},
+		{
+			"enable": "True",
+			"type": "eGaugeHTTP",
+			"id": "eGauge_MainPanel_2",
+			"params": {
+				"host": "egauge2.mhome:80",
+				"sample_interval": "1",
+				"sensors": [
+					{"id":"V1", "unit":"V"},
+					{"id":"V2", "unit":"V"},
+					{"id":"F1", "unit":"Hz"},
+					{"id":"P1", "unit":"W"},
+					{"id":"P2", "unit":"W"},
+					{"id":"P3", "unit":"W"},
+					{"id":"P4", "unit":"W"},
+					{"id":"P5", "unit":"W"},
+					{"id":"P6", "unit":"W"},
+					{"id":"P7", "unit":"W"},
+					{"id":"Ptot", "unit":"VA", "name":"Ptot_real"},
+					{"id":"Ptot*", "unit":"VA", "name":"Ptot_apparent"},
+					{"id":"Ptot1_real", "unit":"W"},
+					{"id":"Ptot1_apparent", "unit":"VA"},
+					{"id":"Phouse_real", "unit":"W"},
+					{"id":"Phouse_apparent", "unit":"VA"}
+				]
+			},
+			"services": [
+				{
+					"enable": "True",
+					"id": "Xively/Mani",
+					"params": {
+						"feed": "131439",
+						"datastream_map": {
+							".*": "eGauge2_\\g<0>"
+						},
+						"aggregation": "10",
+						"downsampling": "2"
+					}
+				},
+				{
+					"enable": "True",
+					"id": "File1",
+					"params": {
+						"write_interval": "10"
+					}
+				},
+				{
+					"enable": "False",
+					"id": "Stdout"
+				}
+			]
+		},
+		{
+			"enable": "True",
+			"type": "TED5000",
+			"id": "TED5000_MainPanel",
+			"params": {
+				"host": "ted5000-main.mhome:80",
+				"sample_interval": 1,
+				"sensors": ["house"],
+				"sensor_names_map":{}
+			},
+			"services": [
+				{
+					"enable": "True",
+					"id": "Xively/Mani",
+					"params": {
+						"feed": "131439",
+						"datastream_map": {
+							"RealPower\\[(.*)\\]": "RealPower_\\g<1>",
+							"ApparentPower\\[(.*)\\]": "ApparentPower_\\g<1>",
+							"Voltage\\[(.*)\\]": "Voltage_\\g<1>"
+						},
+						"aggregation": 10,
+						"downsampling": 2
+					}
+				},
+				{
+					"enable": "True",
+					"id": "File1",
+					"params": {
+						"write_interval": "10"
+					}
+				},
+				{
+					"enable": "False",
+					"id": "Stdout"
+				}
+			]
+		},
+		{
+			"enable": "True",
+			"type": "TED5000",
+			"id": "TED5000_SubPanel",
+			"params": {
+				"host": "ted5000-sub.mhome:80",
+				"sample_interval": 1,
+				"sensors": ["subpanel", "oven", "pool"],
+				"sensor_names_map":{}
+			},
+			"services": [
+				{
+					"enable": "True",
+					"id": "Xively/Mani",
+					"params": {
+						"feed": "131439",
+						"datastream_map": {
+							"RealPower\\[(.*)\\]": "RealPower_\\g<1>",
+							"ApparentPower\\[(.*)\\]": "ApparentPower_\\g<1>",
+							"Voltage\\[(.*)\\]": "Voltage_\\g<1>"
+						},
+						"aggregation": "10",
+						"downsampling": "2"
+					}
+				},
+				{
+					"enable": "True",
+					"id": "File1",
+					"params": {
+						"write_interval": "10"
+					}
+				},
+				{
+					"enable": "False",
+					"id": "Stdout"
+				}
+			]
+		}
+	]
+}
+		
