@@ -1,0 +1,6 @@
+sam_out/
+sam_drops/
+sam_logs/
+*.pyc
+.DS_Store
+misc/
