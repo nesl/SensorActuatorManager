@@ -11,7 +11,8 @@ import Queue
 import BaseDevice
 import socket
 import signal
-import httplib
+#import httplib
+import requests
 import xml.dom.minidom
 import logging
 
@@ -42,12 +43,16 @@ class TED5000(BaseDevice.Device):
 		voltampere=[]
 		
 		try:
-			conn = httplib.HTTPConnection(self.host,self.port,timeout=self.timeout)
+			# conn = httplib.HTTPConnection(self.host,self.port,timeout=self.timeout)
+			ted5000_url = "http://%s:%s/api/LiveData.xml"%(self.host,self.port)
 			reply[0] = time.time()
-			conn.request("GET","/api/LiveData.xml")
-			res = conn.getresponse()
-			if (res.status == 200):
-				xml_data = res.read()
+			r = requests.get(ted5000_url,timeout=self.timeout)
+			#conn.request("GET","/api/LiveData.xml")
+			#res = conn.getresponse()
+			#if (res.status == 200):
+			if (r.status_code == requests.codes.ok):
+				#xml_data = res.read()
+				xml_data = r.text
 				dom = xml.dom.minidom.parseString(xml_data)
 				VoltageNow = dom.getElementsByTagName('VoltageNow')
 				PowerNow = dom.getElementsByTagName('PowerNow')
@@ -73,7 +78,7 @@ class TED5000(BaseDevice.Device):
 			reply = None
 			loggin.error("Cannot communicate with %s for %s.%s"%(res.status,self.host,self.type,self.id))
 		finally:
-			conn.close()
+			#conn.close()
 			# print(reply)
 			return reply
 

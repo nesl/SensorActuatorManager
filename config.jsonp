@@ -60,8 +60,8 @@
 			"type": "EatonIQ260",
 			"id": "BHMeter1",
 			"params": {
-				"host": "128.97.11.100",
-				"port": 4660,
+				"host": "128.97.93.90",
+				"port": 4661,
 				"sample_interval": 3,
 				"sensor_names_map":{}
 			},
@@ -81,7 +81,7 @@
 				"port": 4660,
 				"sample_interval": 3,
 				"sensor_names_map":{},
-				"sensors":["%%[str(x+1) for x in range(20)]"]
+				"sensors":"%%[str(x+1) for x in range(20)]"
 			},
 			"services": [
 				{
@@ -93,7 +93,7 @@
 			]
 		},
 		{
-			"enable": "True",
+			"enable": "False",
 			"type": "PushDevice",
 			"id": "PushDeviceServer",
 			"params": {
@@ -132,7 +132,7 @@
 			]
 		},
 		{
-			"enable": "False",
+			"enable": "True",
 			"type": "Vera",
 			"id": "Vera3@Home",
 			"params": {
@@ -191,7 +191,7 @@
 			]
 		},
 		{
-			"enable": "False",
+			"enable": "True",
 			"type": "Raritan",
 			"id": "Raritan_Study",
 			"params": {
@@ -204,7 +204,7 @@
 			},
 			"services": [
 				{
-					"enable": "True",
+					"enable": "False",
 					"id": "Xively/Mani",
 					"params": {
 						"feed": "131445",
@@ -219,14 +219,14 @@
 					}
 				},
 				{
-					"enable": "True",
+					"enable": "False",
 					"id": "File1",
 					"params": {
 						"write_interval": "10"
 					}
 				},
 				{
-					"enable": "False",
+					"enable": "True",
 					"id": "Stdout",
 					"params": {
 						"channel_mask": "%%[1 for x in range(40)]",
@@ -277,7 +277,7 @@
 			]
 		},
 		{
-			"enable": "False",
+			"enable": "True",
 			"type": "eGaugeHTTP",
 			"id": "eGauge_MainPanel_1",
 			"params": {
@@ -304,7 +304,7 @@
 			},
 			"services": [
 				{
-					"enable": "True",
+					"enable": "False",
 					"id": "Xively/Mani",
 					"params": {
 						"feed": "131439",
@@ -314,20 +314,20 @@
 					}
 				},
 				{
-					"enable": "True",
+					"enable": "False",
 					"id": "File1",
 					"params": {
 						"write_interval": "10"
 					}
 				},
 				{
-					"enable": "False",
+					"enable": "True",
 					"id": "Stdout"
 				}
 			]
 		},
 		{
-			"enable": "False",
+			"enable": "True",
 			"type": "eGaugeHTTP",
 			"id": "eGauge_MainPanel_2",
 			"params": {
@@ -354,7 +354,7 @@
 			},
 			"services": [
 				{
-					"enable": "True",
+					"enable": "False",
 					"id": "Xively/Mani",
 					"params": {
 						"feed": "131439",
@@ -364,14 +364,14 @@
 					}
 				},
 				{
-					"enable": "True",
+					"enable": "False",
 					"id": "File1",
 					"params": {
 						"write_interval": "10"
 					}
 				},
 				{
-					"enable": "False",
+					"enable": "True",
 					"id": "Stdout"
 				}
 			]
@@ -413,7 +413,7 @@
 			]
 		},
 		{
-			"enable": "False",
+			"enable": "True",
 			"type": "TED5000",
 			"id": "TED5000_SubPanel",
 			"params": {
@@ -424,7 +424,7 @@
 			},
 			"services": [
 				{
-					"enable": "True",
+					"enable": "False",
 					"id": "Xively/Mani",
 					"params": {
 						"feed": "131439",
@@ -436,14 +436,14 @@
 					}
 				},
 				{
-					"enable": "True",
+					"enable": "False",
 					"id": "File1",
 					"params": {
 						"write_interval": "10"
 					}
 				},
 				{
-					"enable": "False",
+					"enable": "True",
 					"id": "Stdout"
 				}
 			]

@@ -9,7 +9,8 @@ import os
 import Queue
 import BaseDevice
 import time
-import httplib
+#import httplib
+import requests
 import xml.dom.minidom
 import logging
 
@@ -45,13 +46,17 @@ class eGaugeHTTP(BaseDevice.Device):
 	def get_sample(self):
 		# return self.get_sample_test()
 		reply = [None for _i in range(1+len(self.sensors))]
-		conn = httplib.HTTPConnection(self.host,self.port,timeout=self.timeout)
+		# conn = httplib.HTTPConnection(self.host,self.port,timeout=self.timeout)
 		try:
-			conn.request("GET","/cgi-bin/egauge?inst")
+			# conn.request("GET","/cgi-bin/egauge?inst")
+			egauge_url = "http://%s:%s/cgi-bin/egauge?inst"%(self.host,self.port)
 			reply[0] = time.time()
-			res = conn.getresponse()
-			if (res.status == 200):
-				xml_data = res.read()
+			r = requests.get(egauge_url,timeout=self.timeout)
+			# res = conn.getresponse()
+			#if (res.status == 200):
+			if (r.status_code == requests.codes.ok):
+				# xml_data = res.read()
+				xml_data = r.text
 				dom = xml.dom.minidom.parseString(xml_data)
 				if (dom.getElementsByTagName("data")):
 					for r in dom.getElementsByTagName('r'):

@@ -79,7 +79,10 @@ class VerisE30A042(ModbusDevice.TCPModbusDevice):
 				return(None)
 		self.disconnect()
 		self.statistics[1] = self.statistics[1]+1
-		debug_mesg(reply)
+		# multiply PowerFactor by 100 to put it into unites of %
+		for i in range(self.max_meter_count):
+			reply[self.max_meter_count+i+1] = 100*reply[self.max_meter_count+i+1]
+		logging.debug(reply)
 		return reply	
 		
 	def get_device_channels(self):
@@ -90,5 +93,5 @@ class VerisE30A042(ModbusDevice.TCPModbusDevice):
 			for s in self.sensors:
 				if s:
 					r.append((self.sensor_names_map.get("%s[%s]"%(reg_type,s),"%s[%s]"%(reg_type,s)),reg_unit))
-		debug_mesg(r)
+		logging.debug(r)
 		return r

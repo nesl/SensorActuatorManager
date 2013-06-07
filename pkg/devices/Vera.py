@@ -8,7 +8,8 @@ import sys
 import os
 import Queue
 import BaseDevice
-import httplib
+#import httplib
+import requests
 import time
 import json
 import logging
@@ -52,15 +53,18 @@ class Vera(BaseDevice.Device):
 	def get_sample(self):
 		# return self.get_sample_test()
 		reply = [None for _i in range(1+len(self.sensors))]
-		conn = httplib.HTTPConnection(self.host,self.port,timeout=self.timeout)
+		#conn = httplib.HTTPConnection(self.host,self.port,timeout=self.timeout)
 		try:
-			conn.request("GET","/data_request?id=sdata&output_format=json")
+			#conn.request("GET","/data_request?id=sdata&output_format=json")
+			vera_url = "http://%s:%s/data_request?id=sdata&output_format=json"%(self.host,self.port)
 			reply[0] = time.time()
-			res = conn.getresponse()
-			
-			if (res.status == 200):
+			r = requests.get(vera_url,timeout=self.timeout)
+			#res = conn.getresponse()
+			#if (res.status == 200):
+			if (r.status_code == requests.codes.ok):
 				try:
-					json_data = json_convert_unicode_to_string(json.loads(res.read()))
+					#json_data = json_convert_unicode_to_string(json.loads(res.read()))
+					json_data = json_convert_unicode_to_string(json.loads(r.text))
 					for d in json_data['devices']:
 						for field,index in self.sensor_to_index_map.get(("devices",d['id']),{}).iteritems():
 							if field in d:

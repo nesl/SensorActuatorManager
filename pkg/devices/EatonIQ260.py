@@ -62,7 +62,7 @@ class EatonIQ260(ModbusDevice.TCPModbusDevice):
 			return None
 		current_time = time.time()
 		reply = [time.time()]
-		data = self.read_modbus_register(meter[0],2*len(self.sensors),"f"*len(self.sensors))
+		data = self.read_modbus_register(self.reg_addr,2*len(self.sensors),"f"*len(self.sensors))
 		if data:
 			for (i,v ) in enumerate(data):
 				reply.append(v) 
@@ -71,7 +71,10 @@ class EatonIQ260(ModbusDevice.TCPModbusDevice):
 			return(None)
 		self.disconnect()
 		self.statistics[1] = self.statistics[1]+1
-		debug_mesg(reply)
+		# fix units of PowerFactor to be %
+		for i in [13, -3, -2, -1]:
+			reply[i] = 100*reply[i]
+		logging.debug(reply)
 		return reply	
 		
 	def get_device_channels(self):

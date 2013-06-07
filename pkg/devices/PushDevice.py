@@ -8,7 +8,6 @@ import sys
 import os
 import Queue
 import BaseDevice
-import httplib
 import time
 import json
 import cherrypy
