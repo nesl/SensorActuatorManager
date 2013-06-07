@@ -14,7 +14,7 @@
 				},
 				"upload_buffer_size":500,
 				"max_datapoints_per_write":490, 
-				"dropped_datapoint_save": true,
+				"dropped_datapoint_save": false,
 				"dropped_datapoint_folder":"./sam_drops"
 			}
 		},
@@ -93,36 +93,36 @@
 			]
 		},
 		{
-			"enable": "False",
+			"enable": "True",
 			"type": "PushDevice",
 			"id": "PushDeviceServer",
 			"params": {
 				"port": 8100,
 				"apikey": "abcd",
 				"mode": "cherrypy",
+				"drop_unknown_sensors":false,
 				"sensors": [
-					{"feed":"12", "datastream":"front_door", "unit":"bool", "feed_name":"1012", "datastream_name":"front_door_event"},
-					{"feed":"13", "datastream":"garage_door", "unit":"bool", "feed_name":"1013", "datastream_name":"garage_door_event"}
+					{"device":"12", "datastream":"front_door", "unit":"bool", "device_name":"vera", "datastream_name":"front_door_event"},
+					{"device":"12", "datastream":"garage_door", "unit":"bool", "device_name":"vera", "datastream_name":"garage_door_event"},
+					{"device":"12", "datastream":"key", "unit":"str", "device_name":"vera", "datastream_name":"key"}
 				]
 			},
 			"services": [
 				{
-					"enable": "False",
+					"enable": "True",
 					"id": "Xively/Mani",
 					"params": {
-						"feed_map": {
-							".*": "\\0"
-						},
-						"feed": "10",
+						"feed": "1578024686",
 						"datastream_map": {
-							".*": "\\0"
-						},
-						"aggregation": "10",
-						"downsampling": "2"
+							"vera\\[front_door_event\\]": "channel1",
+							"vera\\[garage_door_event\\]": "channel2",
+							"vera\\[key\\]": "channel3",
+							".*": "\\g<0>"
+						}
 					}
 				},
 				{
-					"enable": "True",
+					"enable": "False",
 					"id": "Stdout",
 					"params": {
 						"channel_mask": "%%[1 for x in range(2)]",
@@ -155,7 +155,7 @@
 			]
 		},
 		{
-		    "enable": "True",
+		    "enable": "False",
 			"type": "Shenitech",
 			"id": "MainMeter",
 			"params": {
@@ -172,9 +172,7 @@
 						"datastream_map": {
 							"FlowRate":"house_water_flow",
 							"XXX.*": "\\g<0>"
-						},
-						"aggregation": "10",
-						"downsampling": "2"
+						}
 					}
 				},
 				{
@@ -193,7 +191,7 @@
 			]
 		},
 		{
-			"enable": "True",
+			"enable": "False",
 			"type": "Raritan",
 			"id": "Raritan_Study",
 			"params": {
@@ -217,9 +215,7 @@
 							"Current\\[(.*)\\]":"Current_Study_\\g<1>",
 							"Voltage\\[(.*)\\]":"Voltage_Study_\\g<1>",
 							"XXX.*": "\\g<0>"
-						},
-						"aggregation": "10",
-						"downsampling": "2"
+						}
 					}
 				},
 				{
@@ -240,7 +236,7 @@
 			]
 		},
 		{
-			"enable": "True",
+			"enable": "False",
 			"type": "Raritan",
 			"id": "Raritan_TV",
 			"params": {
@@ -264,9 +260,7 @@
 							"Current\\[(.*)\\]":"Current_TV_\\g<1>",
 							"Voltage\\[(.*)\\]":"Voltage_TV_\\g<1>",
 							"XXX.*": "\\g<0>"
-						},
-						"aggregation": "10",
-						"downsampling": "2"
+						}
 					}
 				},
 				{
@@ -283,7 +277,7 @@
 			]
 		},
 		{
-			"enable": "True",
+			"enable": "False",
 			"type": "eGaugeHTTP",
 			"id": "eGauge_MainPanel_1",
 			"params": {
@@ -316,9 +310,7 @@
 						"feed": "131439",
 						"datastream_map": {
 							".*": "eGauge1_\\g<0>"
-						},
-						"aggregation": "10",
-						"downsampling": "2"
+						}
 					}
 				},
 				{
@@ -335,7 +327,7 @@
 			]
 		},
 		{
-			"enable": "True",
+			"enable": "False",
 			"type": "eGaugeHTTP",
 			"id": "eGauge_MainPanel_2",
 			"params": {
@@ -368,9 +360,7 @@
 						"feed": "131439",
 						"datastream_map": {
 							".*": "eGauge2_\\g<0>"
-						},
-						"aggregation": "10",
-						"downsampling": "2"
+						}
 					}
 				},
 				{
@@ -387,7 +377,7 @@
 			]
 		},
 		{
-			"enable": "True",
+			"enable": "False",
 			"type": "TED5000",
 			"id": "TED5000_MainPanel",
 			"params": {
@@ -406,9 +396,7 @@
 							"RealPower\\[(.*)\\]": "RealPower_\\g<1>",
 							"ApparentPower\\[(.*)\\]": "ApparentPower_\\g<1>",
 							"Voltage\\[(.*)\\]": "Voltage_\\g<1>"
-						},
-						"aggregation": 10,
-						"downsampling": 2
+						}
 					}
 				},
 				{
@@ -425,7 +413,7 @@
 			]
 		},
 		{
-			"enable": "True",
+			"enable": "False",
 			"type": "TED5000",
 			"id": "TED5000_SubPanel",
 			"params": {
@@ -444,9 +432,7 @@
 							"RealPower\\[(.*)\\]": "RealPower_\\g<1>",
 							"ApparentPower\\[(.*)\\]": "ApparentPower_\\g<1>",
 							"Voltage\\[(.*)\\]": "Voltage_\\g<1>"
-						},
-						"aggregation": "10",
-						"downsampling": "2"
+						}
 					}
 				},
 				{

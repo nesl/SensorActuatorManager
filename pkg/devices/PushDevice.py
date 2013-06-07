@@ -21,14 +21,14 @@ class ApiVersion1(object):
 	def __init__(self,grandparent):
 		self.device = grandparent
 
-	def upload(self, feed_id):
+	def upload(self, device_id):
 		if (cherrypy.request.method!="POST"):
 			return ""
 		cl = cherrypy.request.headers['Content-Length']
 		api_key_received = cherrypy.request.headers.get('X-ApiKey',None)
 		rawbody = cherrypy.request.body.read(int(cl))
 		body = json_convert_unicode_to_string(json.loads(rawbody))
-		return self.device.handle_request(api_key_received,feed_id,body)
+		return self.device.handle_request(api_key_received,device_id,body)
 		# return "Updated %r." % (body,)
 
 	def index(self):
@@ -75,19 +75,29 @@ class PushDevice(BaseDevice.Device):
 		
 		self.mode = self.params.get('mode',"cherrypy")
 		
+		self.drop_unknown_sensors = self.params.get('drop_unknown_sensors',True)
+		if type(self.drop_unknown_sensors)==str:
+			if self.drop_unknown_sensors.upper()=="TRUE":
+				self.drop_unknown_sensors=True
+			elif self.drop_unknown_sensors.upper()=="FALSE":
+				self.drop_unknown_sensors=False
+		if type(self.drop_unknown_sensors)!=bool:
+			logging.error("parameter drop_unknown_sensors for device "+self.type+":"+self.id+" is invalid.")
+			exit(1)
+		
 		self.sensors = self.params.get('sensors',{})
 		if (type(self.sensors)!=list):
 			self.sensors=[self.sensors]
 		
 		self.sensor_info={}
 		for i,v in enumerate(self.sensors):
-			if type(v)!=dict or (not 'datastream' in v) or (not 'unit' in v) or (not 'feed' in v):
+			if type(v)!=dict or (not 'datastream' in v) or (not 'unit' in v) or (not 'device' in v):
 				logging.error("malformed sensor specification %s for device %s:%s"%(v,self.type,self.id))
 				exit(1)
-			if not v['feed'] in self.sensor_info:
-				self.sensor_info[v['feed']]={}
-			if not v['datastream'] in self.sensor_info[v['feed']]:
-				self.sensor_info[v['feed']][v['datastream']]=(v.get('feed_name',v['feed']),v.get('datastream_name',v['datastream']),v['unit'])
+			if not v['device'] in self.sensor_info:
+				self.sensor_info[v['device']]={}
+			if not v['datastream'] in self.sensor_info[v['device']]:
+				self.sensor_info[v['device']][v['datastream']]=(v.get('device_name',v['device']),v.get('datastream_name',v['datastream']),v['unit'])
 		#print(self.sensor_info)
 		print("Created PushDevice with id: "+id)
 
@@ -104,7 +114,7 @@ class PushDevice(BaseDevice.Device):
 		return r
 		
 	def run(self):
-		debug_mesg("Running thread for device "+self.type+":"+self.id)
+		logging.debug("Running thread for device "+self.type+":"+self.id)
 		if self.mode=="cherrypy":
 			self.api=Api()
 			self.api.v1=ApiVersion1(self)
@@ -130,22 +140,33 @@ class PushDevice(BaseDevice.Device):
 		return True
 
 		
-	def handle_request(self,api_key_received,feed_id,body):
+	def handle_request(self,api_key_received,device_id,body):
 		if api_key_received==self.apikey:
 			if not self.validate_request(body):
 				raise cherrypy.HTTPError(status=400, message="Incorrect payload.")
-			if not feed_id in self.sensor_info:
-				s = {'feed':feed_id, 'datastreams':body['datastreams']}
+			if not device_id in self.sensor_info:
+				if self.drop_unknown_sensors:
+					return "Unknown sensor dropped"
+				s = {'device':device_id, 'datastreams':body['datastreams']}
+				#print(s)
+				for q in self.outputqueues:
+					q.put(s)
 			else:
+				#print(body['datastreams'])
 				for datastream in body['datastreams']:
-					f = self.sensor_info[feed_id]
+					f = self.sensor_info[device_id]
+					#print(datastream['id'])
+					#print(f)
+					s = {}
 					if datastream['id'] in f:
 						x = f[datastream['id']]
-						s = {}
-						s['feed']=x[0]
+						s['device']=x[0]
 						s['datastreams']=[{'id':x[1], 'datapoints':datastream['datapoints']}]
 					else:
-						s = {'feed':feed_id, 'datastreams':[datastream]}
+						if not self.drop_unknown_sensors:
+							s = {'device':device_id, 'datastreams':[datastream]}
+						else:
+							return "Unknown sensor dropped"
 					#print(s)
 					for q in self.outputqueues:
 						q.put(s)							

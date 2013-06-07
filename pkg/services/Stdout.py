@@ -10,6 +10,7 @@ import Queue
 import BaseService
 import calendar
 import iso8601
+import logging
 
 class Stdout(BaseService.Service):
 	def __init__(self, id, params):
@@ -17,9 +18,9 @@ class Stdout(BaseService.Service):
 		print("Created Stdout Service with id: "+id)
 	
 	def process_sample(self,s,p,d,q):
-		debug_mesg(s)
-		debug_mesg(p)
-		debug_mesg(d)
+		logging.debug(s)
+		logging.debug(p)
+		logging.debug(d)
 		if type(s)==tuple or type(s)==list:
 			o = "%s,%s,%s"%(d[0],d[1],s[0])
 			for i, (c,m,ct) in enumerate(d[2]):
@@ -37,7 +38,7 @@ class Stdout(BaseService.Service):
 				o = o+",%s,%s,%s"%(c[0],x,c[1])
 			print(o)
 		elif type(s)==dict:
-			feed = s['feed']
+			feed = s['device']
 			for ds in s['datastreams']:
 				for dp in ds['datapoints']:
 					o="%s,%s,%s,%s[%s],%s,%s"%(d[0],d[1],calendar.timegm(iso8601.parse_date(dp['at']).utctimetuple()),feed,ds['id'],dp['value'],self.units_cache.get((q,feed,ds['id']),"unknown"))

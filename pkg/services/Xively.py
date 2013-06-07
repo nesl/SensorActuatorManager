@@ -17,6 +17,8 @@ import threading, Queue
 import requests 
 from urlparse import urlparse
 import logging
+import calendar
+import iso8601
 
 from datetime import datetime
 
@@ -170,22 +172,32 @@ class XivelyUploadHelper(threading.Thread):
 				if current_time>=self.parent.feed_state_info[f][1]:
 					# print("Uploading feed %s at %s"%(f,current_time))
 					q = self.parent.feed_state_info[f][2]
-					num_datapoints = q.qsize()
-					# print("# of datapoint = %s"%num_datapoints)
+					
 					xively_message = {}
 					while not q.empty():
 						item = q.get()
+						# item is of the form (datastream_id, [datapoint_record, ...])
 						if not item[0] in xively_message:
-							xively_message[item[0]] = [item[1]]
+							xively_message[item[0]] = item[1]
 						else:
-							xively_message[item[0]].append(item[1])						
+							xively_message[item[0]].extend(item[1])						
 					logging.debug(xively_message)
 					
 					# if this feed's queue was empty, there is no message to be sent... move on to the next one
 					if xively_message=={}:
 						continue
 					
+					num_datapoints = q.qsize()
+					print("# of datapoint [method 1] = %s"%num_datapoints),
+						
+					num_datapoints = 0
+					for ds_id in xively_message:
+						num_datapoints = num_datapoints + len(xively_message[ds_id])
+						
+					print("# of datapoint [method 2] = %s"%num_datapoints)
+					
 					update_result = self.update_xively_feed(f,xively_message,num_datapoints)
+					
 					#print(update_result)
 					if update_result[5]>0:
 						# some samples got buffered ... let us speed up a bit the polling of this feed
@@ -297,9 +309,6 @@ class Xively(BaseService.Service):
 			exit(1)
 				
 		self.dropped_datapoint_save = params.get('dropped_datapoint_save',True)
-		if type(self.dropped_datapoint_save)==str and (self.dropped_datapoint_save.upper()!="TRUE" and self.dropped_datapoint_save.upper()!="FALSE"):
-			logging.error("parameter dropped_datapoint_save for service "+self.type+":"+self.id+" is invalid.")
-			exit(1)
 		if type(self.dropped_datapoint_save)==str:
 			if self.dropped_datapoint_save.upper()=="TRUE":
 				self.dropped_datapoint_save=True
@@ -378,12 +387,13 @@ class Xively(BaseService.Service):
 		logging.debug(s)
 		logging.debug(p)
 		logging.debug(d)
-		if type(s)==tuple or type(s)==list:
-			if not self.xively_feeds[q]:
-				# no feed to deposit this sample to!
-				logging.error("no feed specified for samples from device %s:%s to service %s:%s. Dropping samples."%(d[0],d[1],self['type'],self['id']))
-			else:
-				feed_id = self.xively_feeds[q]
+		if not self.xively_feeds[q]:
+			# no feed to deposit this sample to!
+			logging.error("no feed specified for samples from device %s:%s to service %s:%s. Dropping samples."%(d[0],d[1],self['type'],self['id']))
+		else:
+			feed_id = self.xively_feeds[q]
+			
+			if type(s)==tuple or type(s)==list:
 				dp_ts = s[0] # timestamp
 				for i, (c,m,ct) in enumerate(d[2]):
 					if not m:
@@ -399,20 +409,28 @@ class Xively(BaseService.Service):
 						dp_value = s[i+1]
 					ds_id = match_and_replace(self.xively_datastream_maps[q],c[0])
 					if type(ds_id)!=str:
-						logging.error("datastream_map %s yields invalid datastream id %s for inout %s"%(self.xively_datastream_maps[q],ds_id,c[0]))
+						logging.error("datastream_maps %s yield invalid datastream id %s for input %s"%(self.xively_datastream_maps[q],ds_id,c[0]))
 					else:
-						#print(self.xively_datastream_maps[q]),
-						#print(c[0]),
-						dp = (ds_id, {"at":datetime.utcfromtimestamp(dp_ts).isoformat()+'Z', "value":"%s"%(dp_value)})
-						#print(dp)
-						self.feed_state_info[feed_id][2].put(dp)
-						#print(self.feed_state_info[feed_id])
-		elif type(s)==dict:
-			feed = s['feed']
-			for ds in s['datastreams']:
-				for dp in ds['datapoints']:
-					o="%s,%s,%s,%s[%s],%s,%s"%(d[0],d[1],calendar.timegm(iso8601.parse_date(dp['at']).utctimetuple()),feed,ds['id'],dp['value'],self.units_cache.get((q,feed,ds['id']),"unknown"))
-					print(o)
+						item = (ds_id, [{"at":datetime.utcfromtimestamp(dp_ts).isoformat()+'Z', "value":"%s"%(dp_value)}])
+						self.feed_state_info[feed_id][2].put(item)
+			elif type(s)==dict:
+				#print(s)
+				devicenaame = s['device']
+				for ds in s['datastreams']:
+					ds_id_raw = "%s[%s]"%(devicenaame,ds['id'])
+					#print(self.xively_datastream_maps[q]),
+					#print(ds_id_raw)
+					ds_id = match_and_replace(self.xively_datastream_maps[q],ds_id_raw)
+					#print(type(ds_id))
+					if type(ds_id)!=str:
+						logging.error("datastream_maps %s yield invalid datastream id %s for input %s"%(self.xively_datastream_maps[q],ds_id_raw))
+					else:
+						item = (ds_id, ds['datapoints'])
+						#print(item)
+						self.feed_state_info[feed_id][2].put(item)
+			else:
+				logging.error("invalid type of sample %s received from queue by %s.%s"%(type(s),self.type,self.id))
+	
 		if not self.uploader_thread:
 			#this is the first sample sent to this service
 			#so let us start the uploader thread too
