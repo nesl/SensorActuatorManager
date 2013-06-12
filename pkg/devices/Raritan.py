@@ -49,65 +49,69 @@ class Raritan(BaseDevice.Device):
 		return tuple(r)
 
 	def get_sample(self):
-		# return self.get_sample_test()
-		count=0
-		self.statistics[0] = self.statistics[0]+1
-		current_time = time.time()
-		errorIndication, errorStatus, errorIndex, varBinds = cmdgen.CommandGenerator().getCmd(
-			cmdgen.CommunityData(self.username,self.password), # read-only
-			# SNMP v3
-			cmdgen.UdpTransportTarget((self.host, self.port)),
-			# Current for 8 outlets (milliamps)
-			(1,3,6,1,4,1,13742,4,1,2,2,1,4,1), (1,3,6,1,4,1,13742,4,1,2,2,1,4,2),
-			(1,3,6,1,4,1,13742,4,1,2,2,1,4,3), (1,3,6,1,4,1,13742,4,1,2,2,1,4,4), 
-			(1,3,6,1,4,1,13742,4,1,2,2,1,4,5), (1,3,6,1,4,1,13742,4,1,2,2,1,4,6),
-			(1,3,6,1,4,1,13742,4,1,2,2,1,4,7), (1,3,6,1,4,1,13742,4,1,2,2,1,4,8),
+		try:
+			# return self.get_sample_test()
+			count=0
+			self.statistics[0] = self.statistics[0]+1
+			current_time = time.time()
+			errorIndication, errorStatus, errorIndex, varBinds = cmdgen.CommandGenerator().getCmd(
+				cmdgen.CommunityData(self.username,self.password), # read-only
+				# SNMP v3
+				cmdgen.UdpTransportTarget((self.host, self.port)),
+				# Current for 8 outlets (milliamps)
+				(1,3,6,1,4,1,13742,4,1,2,2,1,4,1), (1,3,6,1,4,1,13742,4,1,2,2,1,4,2),
+				(1,3,6,1,4,1,13742,4,1,2,2,1,4,3), (1,3,6,1,4,1,13742,4,1,2,2,1,4,4), 
+				(1,3,6,1,4,1,13742,4,1,2,2,1,4,5), (1,3,6,1,4,1,13742,4,1,2,2,1,4,6),
+				(1,3,6,1,4,1,13742,4,1,2,2,1,4,7), (1,3,6,1,4,1,13742,4,1,2,2,1,4,8),
 
-			# Voltage for 8 outlets (millivolts)
-			(1,3,6,1,4,1,13742,4,1,2,2,1,6,1), (1,3,6,1,4,1,13742,4,1,2,2,1,6,2),
-			(1,3,6,1,4,1,13742,4,1,2,2,1,6,3), (1,3,6,1,4,1,13742,4,1,2,2,1,6,4),
-			(1,3,6,1,4,1,13742,4,1,2,2,1,6,5), (1,3,6,1,4,1,13742,4,1,2,2,1,6,6),
-			(1,3,6,1,4,1,13742,4,1,2,2,1,6,7), (1,3,6,1,4,1,13742,4,1,2,2,1,6,8),
+				# Voltage for 8 outlets (millivolts)
+				(1,3,6,1,4,1,13742,4,1,2,2,1,6,1), (1,3,6,1,4,1,13742,4,1,2,2,1,6,2),
+				(1,3,6,1,4,1,13742,4,1,2,2,1,6,3), (1,3,6,1,4,1,13742,4,1,2,2,1,6,4),
+				(1,3,6,1,4,1,13742,4,1,2,2,1,6,5), (1,3,6,1,4,1,13742,4,1,2,2,1,6,6),
+				(1,3,6,1,4,1,13742,4,1,2,2,1,6,7), (1,3,6,1,4,1,13742,4,1,2,2,1,6,8),
 
-        	# Active Power for 8 outlets (Watts)
-			(1,3,6,1,4,1,13742,4,1,2,2,1,7,1), (1,3,6,1,4,1,13742,4,1,2,2,1,7,2),
-			(1,3,6,1,4,1,13742,4,1,2,2,1,7,3), (1,3,6,1,4,1,13742,4,1,2,2,1,7,4),
-			(1,3,6,1,4,1,13742,4,1,2,2,1,7,5), (1,3,6,1,4,1,13742,4,1,2,2,1,7,6),
-			(1,3,6,1,4,1,13742,4,1,2,2,1,7,7), (1,3,6,1,4,1,13742,4,1,2,2,1,7,8),
+	        	# Active Power for 8 outlets (Watts)
+				(1,3,6,1,4,1,13742,4,1,2,2,1,7,1), (1,3,6,1,4,1,13742,4,1,2,2,1,7,2),
+				(1,3,6,1,4,1,13742,4,1,2,2,1,7,3), (1,3,6,1,4,1,13742,4,1,2,2,1,7,4),
+				(1,3,6,1,4,1,13742,4,1,2,2,1,7,5), (1,3,6,1,4,1,13742,4,1,2,2,1,7,6),
+				(1,3,6,1,4,1,13742,4,1,2,2,1,7,7), (1,3,6,1,4,1,13742,4,1,2,2,1,7,8),
 
-			# Apparent Power for 8 outlets (Volt-amps)
-			(1,3,6,1,4,1,13742,4,1,2,2,1,8,1), (1,3,6,1,4,1,13742,4,1,2,2,1,8,2),
-			(1,3,6,1,4,1,13742,4,1,2,2,1,8,3), (1,3,6,1,4,1,13742,4,1,2,2,1,8,4),
-			(1,3,6,1,4,1,13742,4,1,2,2,1,8,5), (1,3,6,1,4,1,13742,4,1,2,2,1,8,6),
-			(1,3,6,1,4,1,13742,4,1,2,2,1,8,7), (1,3,6,1,4,1,13742,4,1,2,2,1,8,8),
+				# Apparent Power for 8 outlets (Volt-amps)
+				(1,3,6,1,4,1,13742,4,1,2,2,1,8,1), (1,3,6,1,4,1,13742,4,1,2,2,1,8,2),
+				(1,3,6,1,4,1,13742,4,1,2,2,1,8,3), (1,3,6,1,4,1,13742,4,1,2,2,1,8,4),
+				(1,3,6,1,4,1,13742,4,1,2,2,1,8,5), (1,3,6,1,4,1,13742,4,1,2,2,1,8,6),
+				(1,3,6,1,4,1,13742,4,1,2,2,1,8,7), (1,3,6,1,4,1,13742,4,1,2,2,1,8,8),
 
-			# Power Factor for 8 outlets (Percentage)
-			(1,3,6,1,4,1,13742,4,1,2,2,1,9,1), (1,3,6,1,4,1,13742,4,1,2,2,1,9,2),
-			(1,3,6,1,4,1,13742,4,1,2,2,1,9,3), (1,3,6,1,4,1,13742,4,1,2,2,1,9,4),
-			(1,3,6,1,4,1,13742,4,1,2,2,1,9,5), (1,3,6,1,4,1,13742,4,1,2,2,1,9,6),
-			(1,3,6,1,4,1,13742,4,1,2,2,1,9,7), (1,3,6,1,4,1,13742,4,1,2,2,1,9,8)
-		)
+				# Power Factor for 8 outlets (Percentage)
+				(1,3,6,1,4,1,13742,4,1,2,2,1,9,1), (1,3,6,1,4,1,13742,4,1,2,2,1,9,2),
+				(1,3,6,1,4,1,13742,4,1,2,2,1,9,3), (1,3,6,1,4,1,13742,4,1,2,2,1,9,4),
+				(1,3,6,1,4,1,13742,4,1,2,2,1,9,5), (1,3,6,1,4,1,13742,4,1,2,2,1,9,6),
+				(1,3,6,1,4,1,13742,4,1,2,2,1,9,7), (1,3,6,1,4,1,13742,4,1,2,2,1,9,8)
+			)
 		
-		if errorIndication:
-			logging.error("SNMP engine-level error %s for device %s:%s"%(errorIndication,self.type,self.id))
-			return None
-		else:
-			if errorStatus:
-				logging.error("SNMP PDU-level %s error %s for device %s:%s"%(
-					errorStatus.prettyPrint(),varBinds[int(errorIndex)-1],self.type,self.id))
+			if errorIndication:
+				logging.error("SNMP engine-level error %s for device %s:%s"%(errorIndication,self.type,self.id))
 				return None
 			else:
-				reply = [None for _i in range(41)]
-				reply[0] = current_time
-				# following dict maps the SNMP channel to the start position in reply list
-				map = {4:1,6:9,7:17,8:25,9:33}
-				for n, v in varBinds:
-					if (n[-2]<7):
-						reply[map[n[-2]]+n[-1]-1] = int(v)/1000.0 # convert mA and mV to A and V
-					else:
-						reply[map[n[-2]]+n[-1]-1] = int(v)
-				self.statistics[1] = self.statistics[1]+1
-				return tuple(reply)
+				if errorStatus:
+					logging.error("SNMP PDU-level %s error %s for device %s:%s"%(
+						errorStatus.prettyPrint(),varBinds[int(errorIndex)-1],self.type,self.id))
+					return None
+				else:
+					reply = [None for _i in range(41)]
+					reply[0] = current_time
+					# following dict maps the SNMP channel to the start position in reply list
+					map = {4:1,6:9,7:17,8:25,9:33}
+					for n, v in varBinds:
+						if (n[-2]<7):
+							reply[map[n[-2]]+n[-1]-1] = int(v)/1000.0 # convert mA and mV to A and V
+						else:
+							reply[map[n[-2]]+n[-1]-1] = int(v)
+					self.statistics[1] = self.statistics[1]+1
+					return tuple(reply)
+		except:
+			logging.error("Unknown error in get_sample for device %s:%s"%(self.type,self.id))
+			return None
 					
 	def get_device_channels(self):
 		r = []

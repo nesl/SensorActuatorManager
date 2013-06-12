@@ -132,6 +132,7 @@ class XivelyUploadHelper(threading.Thread):
 				logging.error("HTTP Status Code: %s"%(r.status_code))
 				logging.error("HTTP Return Text: %s"%(r.text))
 		except:
+			timestamp3 = time.time()
 			print("Unexpected Error: %s"%(sys.exc_info()[0]))
 			logging.error("Unexpected Error: %s"%(sys.exc_info()[0]))
 					
