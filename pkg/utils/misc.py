@@ -38,17 +38,13 @@ def json_evaluate_expression(json_data):
 			eval_dict = dict(os.environ)
 			# read sam.ini file
 			json_params = []
-			try:
-				c = ConfigParser.SafeConfigParser()
-				c.optionxform = str
-				c.read(os.path.expanduser(".sam_conf"))
-				json_params = c.items('JSON')
-			except:
+			for f in ["sam_conf", ".sam_conf", "~/sam_conf", "~/.sam_conf", "~/lib/sam_conf", "~/lib/.sam_conf", "~/local/lib/sam_conf", "~/localib/.sam_conf" ]:
 				try:
 					c = ConfigParser.SafeConfigParser()
 					c.optionxform = str
-					c.read(os.path.expanduser("~/.sam_conf"))
+					c.read(os.path.expanduser(f))
 					json_params = c.items('JSON')
+					break
 				except:
 					pass
 			for i in json_params:

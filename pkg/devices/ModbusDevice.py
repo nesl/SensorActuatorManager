@@ -14,6 +14,7 @@ import signal
 import struct
 import socket
 import logging
+from pkg.utils.debug import debug_mesg
 
 from pkg.utils import crc16
 
@@ -29,7 +30,7 @@ class TCPModbusDevice(BaseDevice.Device):
 			exit(1)
 		if not hasattr(self, 'timeout'):
 			self.timeout = 2
-		print("Created ModbusDevice with id: "+id)
+		debug_mesg("Created ModbusDevice with id: "+id)
 		
 	def get_device_channels(self):
 		pass

@@ -11,6 +11,7 @@ import BaseDevice
 import ModbusDevice
 import time
 import logging
+from pkg.utils.debug import debug_mesg
 
 class VerisE30A042(ModbusDevice.TCPModbusDevice):
 
@@ -52,7 +53,7 @@ class VerisE30A042(ModbusDevice.TCPModbusDevice):
 			# no need to read all the meters
 			self.max_meter_count = len(self.sensors)
 
-		print("Created VerisE30 Device with id: "+id)
+		debug_mesg("Created VerisE30A042 Device with id: "+id)
 		
 	def get_sample_test(self):
 		self.i=self.i+1

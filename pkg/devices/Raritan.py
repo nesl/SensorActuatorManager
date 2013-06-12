@@ -10,6 +10,7 @@ import Queue
 import BaseDevice
 import time
 import logging
+from pkg.utils.debug import debug_mesg
 
 from pysnmp.entity.rfc3413.oneliner import cmdgen
 
@@ -35,7 +36,7 @@ class Raritan(BaseDevice.Device):
 		if (type(self.sensors)!=list):
 			self.sensors=[self.sensors]
 		self.outlet_names_map = self.params.get('outlet_names_map',{})
-		print("Created Raritan Device with id: "+id)
+		debug_mesg("Created Raritan Device with id: "+id)
 	
 	def get_sample_test(self):
 		self.i=self.i+1

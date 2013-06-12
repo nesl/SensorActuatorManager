@@ -19,6 +19,7 @@ import signal
 import struct
 import socket
 import logging
+from pkg.utils.debug import debug_mesg
 
 from pkg.utils import crc16
 
@@ -255,7 +256,7 @@ class BacnetIPDevice(BaseDevice.Device):
 		self.maxApduLengthAccepted = maxApduLengthAccepted
 		self.segmentationSupported = segmentationSupported
 		self.vendorIdentifier = vendorIdentifier
-		print("Created BacnetIPDevice with id: "+id)
+		debug_mesg("Created BacnetIPDevice with id: "+id)
 		
 	def get_device_channels(self):
 		pass

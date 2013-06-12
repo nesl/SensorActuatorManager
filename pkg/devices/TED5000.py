@@ -15,6 +15,7 @@ import signal
 import requests
 import xml.dom.minidom
 import logging
+from pkg.utils.debug import debug_mesg
 
 class TED5000(BaseDevice.Device):
 	def __init__(self, id, params):
@@ -28,7 +29,7 @@ class TED5000(BaseDevice.Device):
 			exit(1)
 		if not hasattr(self, 'timeout'):
 			self.timeout = 2
-		print("Created TED5000 Device with id: "+id)
+		debug_mesg("Created TED5000 Device with id: "+id)
 
 	def get_sample_test(self):
 		self.i=self.i+1

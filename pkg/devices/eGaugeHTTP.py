@@ -13,6 +13,7 @@ import time
 import requests
 import xml.dom.minidom
 import logging
+from pkg.utils.debug import debug_mesg
 
 class eGaugeHTTP(BaseDevice.Device):
 	def __init__(self, id, params):
@@ -35,7 +36,7 @@ class eGaugeHTTP(BaseDevice.Device):
 				exit(1)
 			self.sensor_to_index_map[v['id']]=i+1
 		#print(self.sensor_to_index_map)
-		print("Created eGaugeHTTP Device with id: "+id)
+		debug_mesg("Created eGaugeHTTP Device with id: "+id)
 
 	def get_sample_test(self):
 		self.i=self.i+1

@@ -13,6 +13,7 @@ import json
 import cherrypy
 import iso8601
 import logging
+from pkg.utils.debug import debug_mesg
 
 from pkg.utils.misc import json_convert_unicode_to_string
 
@@ -98,7 +99,7 @@ class PushDevice(BaseDevice.Device):
 			if not v['datastream'] in self.sensor_info[v['device']]:
 				self.sensor_info[v['device']][v['datastream']]=(v.get('device_name',v['device']),v.get('datastream_name',v['datastream']),v['unit'])
 		#print(self.sensor_info)
-		print("Created PushDevice with id: "+id)
+		debug_mesg("Created PushDevice with id: "+id)
 
 		
 	def get_sample(self):

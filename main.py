@@ -230,9 +230,9 @@ if __name__ == "__main__":
 	parser.add_argument("-l", "--loglevel", help="Logging Level, default: WARNING", default="WARNING")
 	parser.add_argument("-i", "--include", help="List of devices to include, default: all", nargs='*')
 	#parser.add_argument("-l", "--logfilename", help="Log file, default: stdout", type=argparse.FileType('a', 0), default="-")
-	current_time = datetime.now().strftime("%Y%m%d%H%M%S")
+	current_time = datetime.now().strftime("%Y%m%d")
 	default_logfilename = "sam_logs/log_%s.txt"%(current_time)
-	parser.add_argument("-f", "--logfilename", help="Log file, default: logs/log_YYYYmmddHHMMSS", default=default_logfilename)
+	parser.add_argument("-f", "--logfilename", help="Log file, default: logs/log_YYYYmmdd", default=default_logfilename)
 	
 	args = parser.parse_args()
 	
@@ -245,7 +245,7 @@ if __name__ == "__main__":
 		os.makedirs(d)
 				
 	logging.basicConfig(filename=args.logfilename,level=numeric_level,format='%(asctime)s %(levelname)s:%(message)s', datefmt='%m/%d/%Y %I:%M:%S %p')
-	
+	logging.info("STARTING SAM")
 	main = SensorActuatorManager(args.config)
 	
 	main.start()

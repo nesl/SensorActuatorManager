@@ -12,6 +12,7 @@ import BaseDevice
 import socket
 import signal
 import logging
+from pkg.utils.debug import debug_mesg
 
 class Shenitech(BaseDevice.Device):
 	def __init__(self, id, params):
@@ -24,7 +25,7 @@ class Shenitech(BaseDevice.Device):
 			exit(1)
 		if not hasattr(self, 'timeout'):
 			self.timeout = 2
-		print("Created Shenitech Device with id: "+id)
+		debug_mesg("Created Shenitech Device with id: "+id)
 		self.i=0
 	
 	def get_sample_test(self):

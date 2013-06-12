@@ -11,11 +11,12 @@ import BaseService
 import calendar
 import iso8601
 import logging
+from pkg.utils.debug import debug_mesg
 
 class Stdout(BaseService.Service):
 	def __init__(self, id, params):
 		super(Stdout,self).__init__("Stdout", id, params)
-		print("Created Stdout Service with id: "+id)
+		debug_mesg("Created Stdout Service with id: "+id)
 	
 	def process_sample(self,s,p,d,q):
 		logging.debug(s)

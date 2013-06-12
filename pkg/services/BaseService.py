@@ -6,6 +6,7 @@
 
 import threading, Queue
 import logging
+from pkg.utils.debug import debug_mesg
 
 class Service(threading.Thread):
 	

@@ -11,6 +11,7 @@ import BaseDevice
 import ModbusDevice
 import time
 import logging
+from pkg.utils.debug import debug_mesg
 
 class EatonIQ260(ModbusDevice.TCPModbusDevice):
 
@@ -47,7 +48,7 @@ class EatonIQ260(ModbusDevice.TCPModbusDevice):
 		for (i,s) in enumerate(self.sensors):
 			self.sensors[i] = (self.circuit_names_map.get(s[0],s[0]),s[1])
 
-		print("Created EatonIQ260 Device with id: "+id)
+		debug_mesg("Created EatonIQ260 Device with id: "+id)
 		
 	def get_sample_test(self):
 		self.i=self.i+1

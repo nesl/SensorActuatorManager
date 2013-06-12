@@ -12,6 +12,7 @@ import calendar
 import iso8601
 import time
 import logging
+from pkg.utils.debug import debug_mesg
 
 class File(BaseService.Service):
 	def __init__(self, id, params):
@@ -28,7 +29,7 @@ class File(BaseService.Service):
 				exit(1)
 		self.open_file_name=None
 		self.open_file_handle=None
-		print("Created File Output Service with id: "+id)
+		debug_mesg("Created File Output Service with id: "+id)
 
 	def process_sample(self,s,p,d,q):
 		logging.debug(s)

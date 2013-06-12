@@ -23,7 +23,7 @@ import iso8601
 from datetime import datetime
 
 from pkg.utils.misc import match_and_replace, match_and_return, is_valid_host
-
+from pkg.utils.debug import debug_mesg
 
 
 class XivelyUploadHelper(threading.Thread):
@@ -74,8 +74,6 @@ class XivelyUploadHelper(threading.Thread):
 		body_toupload = {"version":"1.0.0", "datastreams":[]}
 		body_todrop = {"version":"1.0.0", "feed":feed, "datastreams":[]}
 		
-		print("%s Xively: feed=%s %s %s (%s+%s) %s %s"%(datetime.now().isoformat(),feed,num_of_dp_manageable,
-			total_dp_available,pending_buffer_len,dpcnt,upload_budget,drop_budget)),
 		
 		num_uploaded = 0
 		num_dropped = 0
@@ -111,7 +109,8 @@ class XivelyUploadHelper(threading.Thread):
 		#print("uploading"),
 		#print(headers),
 		#print(body_toupload)
-		print("| %s %s %s"%(num_dropped,num_uploaded,total_dp_available-num_uploaded-num_dropped))
+		logging.debug("%s Xively: feed=%s %s %s (%s+%s) %s %s | %s %s %s"%(datetime.now().isoformat(),feed,num_of_dp_manageable,
+			total_dp_available,pending_buffer_len,dpcnt,upload_budget,drop_budget, num_dropped,num_uploaded,total_dp_available-num_uploaded-num_dropped))
 		# upload all samples to be uploaded	
 		try:
 			r = None
@@ -121,15 +120,20 @@ class XivelyUploadHelper(threading.Thread):
 			if r.status_code!=200:
 				print(r.status_code),
 				print(r.text)
+				logging.error("HTTP Status Code: %s"%(r.status_code)),
+				logging.error("HTTP Return Text: %s"%(r.text))
 		except requests.exceptions.SSLError as e:
 			timestamp3 = time.time()
 			print("SSLError: %s"%(e))
+			logging.error("SSLError: %s"%(e))
 			if r!=None:
 				print(r.status_code),
 				print(r.text)
+				logging.error("HTTP Status Code: %s"%(r.status_code))
+				logging.error("HTTP Return Text: %s"%(r.text))
 		except:
-			logging.error("Unexpected Error: %s"%(sys.exc_info()[0]))
 			print("Unexpected Error: %s"%(sys.exc_info()[0]))
+			logging.error("Unexpected Error: %s"%(sys.exc_info()[0]))
 					
 		# save all samples to be dropped into a file
 		if body_todrop["datastreams"]!=[]:
@@ -174,6 +178,8 @@ class XivelyUploadHelper(threading.Thread):
 					q = self.parent.feed_state_info[f][2]
 					
 					xively_message = {}
+					
+					num_datapoints = q.qsize()
 					while not q.empty():
 						item = q.get()
 						# item is of the form (datastream_id, [datapoint_record, ...])
@@ -187,21 +193,21 @@ class XivelyUploadHelper(threading.Thread):
 					if xively_message=={}:
 						continue
 					
-					num_datapoints = q.qsize()
-					print("# of datapoint [method 1] = %s"%num_datapoints),
+					
+					logging.debug("# of datapoint [method 1] = %s"%num_datapoints),
 						
 					num_datapoints = 0
 					for ds_id in xively_message:
 						num_datapoints = num_datapoints + len(xively_message[ds_id])
 						
-					print("# of datapoint [method 2] = %s"%num_datapoints)
+					logging.debug("# of datapoint [method 2] = %s"%num_datapoints)
 					
 					update_result = self.update_xively_feed(f,xively_message,num_datapoints)
 					
 					#print(update_result)
 					if update_result[5]>0:
 						# some samples got buffered ... let us speed up a bit the polling of this feed
-						print("Speeding up!!!")
+						debug_mesg("Speeding up Xively feed %s uploads!!!"%(f))
 						time_for_next_upload_of_this_feed = current_time+min(self.parent.feed_state_info[f][0][1],self.parent.feed_state_info[f][0][0])
 					else:
 						time_for_next_upload_of_this_feed = current_time+self.parent.feed_state_info[f][0][0]
@@ -344,7 +350,7 @@ class Xively(BaseService.Service):
 		
 		self.uploader_thread = None
 		
-		print("Created Xively Upload Service with id: "+id)
+		debug_mesg("Created Xively Upload Service with id: "+id)
 		
 	def attach_queue(self,q,p,h):
 		super(Xively,self).attach_queue(q,p,h)

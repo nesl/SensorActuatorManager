@@ -9,8 +9,9 @@ import os
 import Queue
 import BaseService
 import logging
+from pkg.utils.debug import debug_mesg
 
 class SensorAct(BaseService.Service):
 	def __init__(self, id, params):
 		super(SensorAct,self).__init__("SensorAct", id)
-		print("Created SensorAct:"+id)
+		debug_mesg("Created SensorAct:"+id)

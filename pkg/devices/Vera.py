@@ -13,6 +13,7 @@ import requests
 import time
 import json
 import logging
+from pkg.utils.debug import debug_mesg
 
 from pkg.utils.misc import json_convert_unicode_to_string
 
@@ -44,7 +45,7 @@ class Vera(BaseDevice.Device):
 				self.sensor_to_index_map[k]={v.get('field',"tripped"):(i+1)}
 			else:
 				self.sensor_to_index_map[k][v.get('field',"tripped")]=(i+1)
-		print("Created Vera Device with id: "+id)
+		debug_mesg("Created Vera Device with id: "+id)
 		
 	def get_sample_test(self):
 		self.i=self.i+1
