@@ -53,6 +53,7 @@ class File(BaseService.Service):
 				o = o+",%s,%s,%s"%(c[0],x,c[1])
 			self.write_sample(ts,o+"\n")
 		elif type(s)==dict:
+			#print(s)
 			feed = s['feed']
 			for ds in s['datastreams']:
 				for dp in ds['datapoints']:
@@ -84,6 +85,7 @@ class File(BaseService.Service):
 			except:
 				logging.error("unable to open file %s"%(self.open_file_name))
 		if self.open_file_handle:
+			#print(s),
 			self.open_file_handle.write(s)
 			
 			

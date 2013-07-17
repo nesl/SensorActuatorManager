@@ -22,12 +22,13 @@ class ApiVersion1(object):
 		self.device = grandparent
 
 	def upload(self, device_id):
-		if (cherrypy.request.method!="POST"):
+		if (cherrypy.request.method!="PUT" and cherrypy.request.method!="POST"):
 			return ""
 		cl = cherrypy.request.headers['Content-Length']
 		api_key_received = cherrypy.request.headers.get('X-ApiKey',None)
 		rawbody = cherrypy.request.body.read(int(cl))
 		body = json_convert_unicode_to_string(json.loads(rawbody))
+		# print(body)
 		return self.device.handle_request(api_key_received,device_id,body)
 		# return "Updated %r." % (body,)
 
@@ -59,7 +60,7 @@ function Update() {
 	
 	
 class Api(object):
-	pass
+	exposed = True
 
 # this device starts a web server listening on a specified port waiting for device to push data
 # data is in JSON format, modeled after Xively/COSM's format
@@ -69,7 +70,7 @@ class PushDevice(BaseDevice.Device):
 	def __init__(self, id, params):
 		super(PushDevice,self).__init__("PushDevice", id, params)
 		if not hasattr(self,'port'):
-			self.port=8200
+			self.port=8100
 		
 		self.apikey = self.params.get('apikey',None)
 		
@@ -99,7 +100,7 @@ class PushDevice(BaseDevice.Device):
 			if not v['datastream'] in self.sensor_info[v['device']]:
 				self.sensor_info[v['device']][v['datastream']]=(v.get('device_name',v['device']),v.get('datastream_name',v['datastream']),v['unit'])
 		#print(self.sensor_info)
-		debug_mesg("Created PushDevice with id: "+id)
+		debug_mesg("Created PushDevice with id: "+id+" on port "+str(self.port))
 
 		
 	def get_sample(self):
@@ -119,6 +120,8 @@ class PushDevice(BaseDevice.Device):
 			self.api=Api()
 			self.api.v1=ApiVersion1(self)
 			cherrypy.engine.autoreload.unsubscribe()
+			cherrypy.config.update({'server.socket_host': '0.0.0.0', 'server.socket_port': self.port,})
+			cherrypy.log.screen = False
 			cherrypy.quickstart(self)
 		else:
 			pass
@@ -160,11 +163,11 @@ class PushDevice(BaseDevice.Device):
 					s = {}
 					if datastream['id'] in f:
 						x = f[datastream['id']]
-						s['device']=x[0]
+						s['feed']=x[0]
 						s['datastreams']=[{'id':x[1], 'datapoints':datastream['datapoints']}]
 					else:
 						if not self.drop_unknown_sensors:
-							s = {'device':device_id, 'datastreams':[datastream]}
+							s = {'feed':device_id, 'datastreams':[datastream]}
 						else:
 							return "Unknown sensor dropped"
 					#print(s)
@@ -172,7 +175,7 @@ class PushDevice(BaseDevice.Device):
 						q.put(s)							
 			return "Updated %r." % (body,)
 		else:
-			return "API Key Mismatch"
+			return "<html><body>API Key Mismatch</body></html>"
 		
 		
 		

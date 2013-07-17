@@ -5,3 +5,4 @@ sam_logs/
 .DS_Store
 local/
 private/
+sample_outputs/

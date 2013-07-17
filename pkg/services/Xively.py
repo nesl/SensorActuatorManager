@@ -33,10 +33,9 @@ class XivelyUploadHelper(threading.Thread):
 
 	def update_xively_feed(self,feed,datastreams,dpcnt):
 		# we have to send values datastreams that have dpcnt datapoints
-		# additionally we need to send anthing pending in self.parent.feed_state_info[6]
+		# additionally we need to send anything pending in self.parent.feed_state_info[6]
 		
-		# our basic strategy is to c
-		# if dsflg is True, we will downsample so that only on API call is made
+		# our basic strategy is that we will downsample so that only one API call is made
 		
 		xively_url = str.format(self.parent.api_url_format,feed)
 		headers = {"X-ApiKey": self.parent.api_key}
@@ -73,7 +72,6 @@ class XivelyUploadHelper(threading.Thread):
 		
 		body_toupload = {"version":"1.0.0", "datastreams":[]}
 		body_todrop = {"version":"1.0.0", "feed":feed, "datastreams":[]}
-		
 		
 		num_uploaded = 0
 		num_dropped = 0
@@ -112,18 +110,22 @@ class XivelyUploadHelper(threading.Thread):
 		logging.debug("%s Xively: feed=%s %s %s (%s+%s) %s %s | %s %s %s"%(datetime.now().isoformat(),feed,num_of_dp_manageable,
 			total_dp_available,pending_buffer_len,dpcnt,upload_budget,drop_budget, num_dropped,num_uploaded,total_dp_available-num_uploaded-num_dropped))
 		# upload all samples to be uploaded	
+		upload_succeeded = True
+		num_failed = 0
 		try:
 			r = None
 			timestamp2 = time.time()
 			r = requests.put(xively_url, data=json.dumps(body_toupload), headers=headers, timeout=self.parent.api_timeout, verify=False)
 			timestamp3 = time.time()
 			if r.status_code!=200:
+				upload_succeeded = False
 				print(r.status_code),
 				print(r.text)
 				logging.error("HTTP Status Code: %s"%(r.status_code)),
 				logging.error("HTTP Return Text: %s"%(r.text))
 		except requests.exceptions.SSLError as e:
 			timestamp3 = time.time()
+			upload_succeeded = False
 			print("SSLError: %s"%(e))
 			logging.error("SSLError: %s"%(e))
 			if r!=None:
@@ -133,16 +135,22 @@ class XivelyUploadHelper(threading.Thread):
 				logging.error("HTTP Return Text: %s"%(r.text))
 		except:
 			timestamp3 = time.time()
+			upload_succeeded = False
 			print("Unexpected Error: %s"%(sys.exc_info()[0]))
 			logging.error("Unexpected Error: %s"%(sys.exc_info()[0]))
 					
 		# save all samples to be dropped into a file
+		if not upload_succeeded:
+			body_toupload["feed"] = feed
+			self.write_dropped_sample(feed,body_toupload,timestamp1)
+			num_failed=num_uploaded
+			num_uploaded=0
 		if body_todrop["datastreams"]!=[]:
 			self.write_dropped_sample(feed,body_todrop,timestamp1)
 		
 		# return stats: (arrival_time,upload_start_time,upload_end_time,num_uploaded,num_dropped,num_buffered)
 		
-		return (timestamp1,timestamp2,timestamp3,num_uploaded,num_dropped,total_dp_available-num_uploaded-num_dropped)
+		return (timestamp1,timestamp2,timestamp3,num_uploaded,num_failed,num_dropped,total_dp_available-num_uploaded-num_dropped)
 
 
 	def write_dropped_sample(self,f,dropped_samples,timestamp):
@@ -205,8 +213,9 @@ class XivelyUploadHelper(threading.Thread):
 					
 					update_result = self.update_xively_feed(f,xively_message,num_datapoints)
 					
+					# timestamp1,timestamp2,timestamp3,num_uploaded,num_failed,num_dropped,total_dp_available-num_uploaded-num_dropped
 					#print(update_result)
-					if update_result[5]>0:
+					if update_result[6]>0:
 						# some samples got buffered ... let us speed up a bit the polling of this feed
 						debug_mesg("Speeding up Xively feed %s uploads!!!"%(f))
 						time_for_next_upload_of_this_feed = current_time+min(self.parent.feed_state_info[f][0][1],self.parent.feed_state_info[f][0][0])
@@ -223,12 +232,14 @@ class XivelyUploadHelper(threading.Thread):
 					
 					# compute some stats
 					upload_count = 0
+					failed_count = 0
 					dropped_count = 0
 					api_call_count = 0
 					for e in self.parent.feed_state_info[f][3]:
 						api_call_count = api_call_count + 1
 						upload_count = upload_count + e[3]
-						dropped_count = dropped_count + e[4]
+						failed_count = failed_count + e[4]
+						dropped_count = dropped_count + e[5]
 					
 					#print("Recent statistics for Xively feed %s:"%(f)),
 					#print(self.parent.feed_state_info[f][3])
@@ -422,7 +433,7 @@ class Xively(BaseService.Service):
 						self.feed_state_info[feed_id][2].put(item)
 			elif type(s)==dict:
 				#print(s)
-				devicenaame = s['device']
+				devicenaame = s['feed']
 				for ds in s['datastreams']:
 					ds_id_raw = "%s[%s]"%(devicenaame,ds['id'])
 					#print(self.xively_datastream_maps[q]),

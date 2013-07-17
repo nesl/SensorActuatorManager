@@ -118,7 +118,7 @@ class SensorActuatorManager(object):
 				logging.error(" device "+d['id']+" has no type specified")
 				exit(1)
 
-			# check that parameter list, if present, if properly formed
+			# check that parameter list, if present, is properly formed
 			if ('params' in d):
 				if (type(d['params'])!=dict):
 					logging.error(" device "+d['id']+" has malformed parameters")
